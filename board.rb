@@ -1,14 +1,16 @@
 require_relative 'piece'
 
 class Board
+  attr_reader :grid
+
   def initialize
       @grid = Array.new(8) {Array.new(8)}
       populate
   end
 
   def populate
-    grid[0].each do |space|
-      space << Piece.new
+    @grid[0].each do |space|
+      space = Piece.new
     end
   end
 
