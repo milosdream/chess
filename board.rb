@@ -127,8 +127,13 @@ class Board
     end_row, end_col = end_pos
 
     if end_col != start_col
+      return false if self[end_pos].nil?
+    end
 
-
+    if end_col == start_col
+      return false unless self[end_pos].nil?
+    end
+    true
   end
 
 
@@ -138,6 +143,10 @@ class Board
 
   def []=(position, value)
     @grid[position.first][position.last] = value
+  end
+
+  def in_bounds?(pos)
+    pos.all? { |x| x.between?(0, 7) }
   end
 
 end
