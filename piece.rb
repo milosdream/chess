@@ -1,6 +1,8 @@
 require 'colorize'
 class Piece
 
+  attr_accessor :pos
+
   def initialize(color, pos)
     @color, @pos = color, pos
   end
@@ -13,16 +15,16 @@ class Piece
     end
   end
 
-  def off_board?(pos)
-    !pos.all? { |idx| idx.between?(0,7) }
+  def off_board?(position)
+    !position.all? { |idx| idx.between?(0,7) }
   end
 end
 
 class SlidingPiece < Piece
 
   def diagonals
-    row = pos.first
-    col = pos.last
+    row = @pos.first
+    col = @pos.last
     possibles = []
 
     (-7..7).each do |i|
@@ -37,19 +39,19 @@ class SlidingPiece < Piece
         possibles << new_pos unless off_board?(new_pos)
       end
     end
-    possibles.delete(pos)
+    possibles.delete(@pos)
     possibles
   end
 
   def orthogonals
-    row = pos.first
-    col = pos.last
+    row = @pos.first
+    col = @pos.last
     possibles = []
     (0..7).each do |i|
       possibles << [row, i]
       possibles << [i, col]
     end
-    possibles.delete(pos)
+    possibles.delete(@pos)
     possibles
   end
 end
@@ -74,8 +76,8 @@ class Knight < Piece
 
   def possible_moves
     possibles = []
-    row = pos.first
-    col = pos.last
+    row = @pos.first
+    col = @pos.last
 
     knight_steps = [
       [row + 2, col + 1],
@@ -91,7 +93,7 @@ class Knight < Piece
     knight_steps.each do |new_pos|
       possibles << new_pos unless off_board?(new_pos)
     end
-    possibles.delete(pos)
+    possibles.delete(@pos)
     possibles
   end
 end
@@ -126,8 +128,8 @@ class King < Piece
 
   def possible_moves
     possibles = []
-    row = pos.first
-    col = pos.last
+    row = @pos.first
+    col = @pos.last
 
     (-1..1).each do |i|
       (-1..1).each do |j|
@@ -135,7 +137,7 @@ class King < Piece
         possibles << new_pos unless off_board?(new_pos)
       end
     end
-    possibles.delete(pos)
+    possibles.delete(@pos)
     possibles
   end
 end
