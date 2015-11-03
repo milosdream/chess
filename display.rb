@@ -1,5 +1,6 @@
 require 'colorize'
 require_relative "cursorable"
+require_relative 'piece'
 
 class Display
   include Cursorable
@@ -26,9 +27,9 @@ class Display
 
   def charcter(space)
     if space.nil?
-      "_"
+      "_".yellow
     else
-      "p"
+      space.to_s
     end
   end
 
@@ -42,5 +43,6 @@ class Display
     end
     puts result
   end
+
 
 end
