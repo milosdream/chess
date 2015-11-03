@@ -1,4 +1,5 @@
 require_relative 'piece'
+require "byebug"
 
 class Board
   attr_reader :grid
@@ -11,8 +12,6 @@ class Board
       @grid = Array.new(8) {Array.new(8)}
       populate
   end
-
-
 
   def populate
     @grid[1].each_index do |j|
@@ -32,24 +31,17 @@ class Board
     end
   end
 
-  # def create_skill_piece(*parameters)
-  #   symbol = parameters.last
-  #   case symbol
-  #   when :R, :B, :Q
-  #     SlidingPiece.new(*parameters)
-  #   when :k, :K
-  #     SteppingPiece.new(*parameters)
-  #   end
-  # end
-
   def move(start_pos, end_pos)
     curr_piece = self[start_pos]
     raise "no piece here!" if curr_piece.nil?
-    raise "can't move here!" if curr_piece.valid_moves.include?(end_pos)
+    # raise "can't move here!" if curr_piece.valid_moves.include?(end_pos)
     self[end_pos] = curr_piece
-    curr_piece = nil
-
+    self[start_pos] = nil
   end
+
+  def valid_moves
+  end
+
 
   def [](position)
     @grid[position.first][position.last]

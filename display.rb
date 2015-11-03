@@ -41,7 +41,7 @@ class Display
       puts "pick a spot"
       result = get_input
     end
-    puts result
+    result
   end
 
 

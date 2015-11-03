@@ -16,6 +16,40 @@ end
 
 class SlidingPiece < Piece
 
+  def diagonals
+    row = pos.first
+    col = pos.last
+    forward_diagonals + backwards_diagonals
+  end
+
+  def forward_diagonals
+    current_position = [pos.first, pos.last]
+    forwards = []
+    until off_board?(current_position)
+      current_position.map! { |i| i += 1 }
+      forwards << current_position
+    end
+  end
+
+  def off_board?(pos)
+    pos.all? { |idx| idx.between?(0,7) }
+  end
+
+  def orthogonals
+    row = pos.first
+    col = pos.last
+    possibles = []
+    (0..7).each do |i|
+      possibles << [row, i]
+      possibles << [i, col]
+    end
+    possibles.delete(pos)
+    possibles
+  end
+
+
+
+
 end
 
 class SteppingPiece < Piece
