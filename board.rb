@@ -1,5 +1,6 @@
 require_relative 'piece'
 require "byebug"
+require_relative 'error'
 
 class Board
   attr_reader :grid
@@ -15,31 +16,50 @@ class Board
 
   def populate
     @grid[1].each_index do |j|
-      @grid[1][j] = Pawn.new(:white, [1, j])
+      @grid[1][j] = Pawn.new(:black, [1, j])
     end
 
     @grid[0].each_index do |j|
-      @grid[0][j] = SKILL_PIECES[j].new(:white, [0, j])
+      @grid[0][j] = SKILL_PIECES[j].new(:black, [0, j])
     end
 
     @grid[6].each_index do |j|
-      @grid[6][j] = Pawn.new(:black, [6, j])
+      @grid[6][j] = Pawn.new(:white, [6, j])
     end
 
     @grid[7].each_index do |j|
-      @grid[7][j] = SKILL_PIECES.reverse[j].new(:black, [7, j])
+      @grid[7][j] = SKILL_PIECES.reverse[j].new(:white, [7, j])
     end
   end
 
   def move(start_pos, end_pos)
-    curr_piece = self[start_pos]
-    raise "no piece here!" if curr_piece.nil?
-    raise "not a valid move!" unless curr_piece.possible_moves.include?(end_pos)
-    # raise "can't move here!" unless nil || self[start_pos].color != self[end_pos].color
-    raise "can't move through pieces!" if sliding_through?(start_pos, end_pos)
-    # raise "can't move here!" if curr_piece.move_into_check?(end_pos)
-    self[end_pos] = curr_piece
-    curr_piece.pos = end_pos
+    curr_space = self[start_pos]
+    future_space = self[end_pos]
+    if curr_space.nil?
+      raise MoveError.new "no piece here!"
+    end
+
+    unless curr_space.possible_moves.include?(end_pos)
+      raise MoveError.new "not a valid move!"
+    end
+
+    if sliding_through?(start_pos, end_pos)
+      raise MoveError.new "can't move through pieces!"
+    end
+
+    unless future_space.nil? || curr_space.color != future_space.color
+      raise MoveError.new "spot occupied by your piece!"
+    end
+
+    unless valid_pawn_attack?(start_pos, end_pos)
+      raise MoveError.new "Pawns only attack diagonally"
+    end
+
+    # if curr_space.move_into_check?(end_pos)
+    #   raise MoveError.new "can't move here!"
+    # end
+    self[end_pos] = curr_space
+    curr_space.pos = end_pos
     self[start_pos] = nil
   end
 
@@ -55,15 +75,12 @@ class Board
   end
 
   def sliding_through?(start_pos, end_pos)
-    debugger
 
     curr_piece = self[start_pos]
     return false unless curr_piece.is_a?(SlidingPiece)
 
-    start_row = start_pos.first
-    start_col = start_pos.last
-    end_row = end_pos.first
-    end_col = end_pos.last
+    start_row, start_col  = start_pos
+    end_row, end_col = end_pos
 
     possibles = curr_piece.possible_moves
 
@@ -73,26 +90,26 @@ class Board
     case compare_row
     when -1
       possibles.delete_if do |move|
-        move.first <= start_row || move.first > end_row
+        move.first <= start_row || move.first >= end_row
       end
     when 0
       possibles.delete_if { |move| move.first != start_row }
     when 1
       possibles.delete_if do |move|
-        move.first >= start_row || move.first < end_row
+        move.first >= start_row || move.first <= end_row
       end
     end
 
     case compare_col
     when -1
       possibles.delete_if do |move|
-        move.last <= start_col || move.last > end_col
+        move.last <= start_col || move.last >= end_col
       end
     when 0
       possibles.delete_if { |move| move.last != start_col }
     when 1
       possibles.delete_if do |move|
-        move.last >= start_col || move.last < end_col
+        move.last >= start_col || move.last <= end_col
       end
     end
 
@@ -100,6 +117,18 @@ class Board
   end
 
   def move_into_check?
+  end
+
+  def valid_pawn_attack?(start_pos, end_pos)
+    curr_piece = self[start_pos]
+    return true unless curr_piece.is_a?(Pawn)
+
+    start_row, start_col  = start_pos
+    end_row, end_col = end_pos
+
+    if end_col != start_col
+
+
   end
 
 
@@ -111,7 +140,4 @@ class Board
     @grid[position.first][position.last] = value
   end
 
-  def in_bounds?(pos)
-    pos.all? { |x| x.between?(0, 7) }
-  end
 end

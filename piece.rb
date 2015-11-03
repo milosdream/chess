@@ -2,6 +2,7 @@ require 'colorize'
 class Piece
 
   attr_accessor :pos
+  attr_reader :color
 
   def initialize(color, pos)
     @color, @pos = color, pos
@@ -27,7 +28,7 @@ class SlidingPiece < Piece
     col = @pos.last
     possibles = []
 
-    (-7..7).each do |i|
+    (0..7).each do |i|
       diagonals = [
         [row + i, col + i],
         [row - i, col - i],
@@ -146,5 +147,25 @@ class Pawn < Piece
   def initialize(color, pos)
     @type = :P
     super
+  end
+
+  def possible_moves
+    row_travels = 1 if @color == :black
+    row_travels = -1 if @color == :white
+    row = @pos.first
+    col = @pos.last
+    possibles = []
+
+    (-1..1).each do |j|
+      new_pos = [row + row_travels, col + j]
+      possibles << new_pos unless off_board?(new_pos)
+    end
+
+    if pos.first == 1 || pos.first == 6
+      new_pos = [row + (row_travels * 2), col]
+      possibles << new_pos unless off_board?(new_pos)
+    end
+
+    possibles
   end
 end
