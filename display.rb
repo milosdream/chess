@@ -15,9 +15,9 @@ class Display
     @board.grid.each_with_index do|row, i|
       row.each_with_index do |space, j|
         if [i, j] == @cursor_pos
-          print charcter(space).blue
+          print character(space).blue
         else
-          print charcter(space)
+          print character(space)
         end
         print " "
       end
@@ -25,7 +25,7 @@ class Display
     end
   end
 
-  def charcter(space)
+  def character(space)
     if space.nil?
       "_".yellow
     else

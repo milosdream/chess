@@ -31,14 +31,24 @@ class Board
     end
   end
 
-  def move(start_pos, end_pos)
+  def move(start_pos, end_pos, color)
     curr_space = self[start_pos]
     valid_move?(start_pos, end_pos)
-    #check?(color)
+    right_color?(start_pos, color)
+
+    if move_to_check?(start_pos, end_pos)
+      raise MoveError.new "can't move into check!"
+    end
 
     self[end_pos] = curr_space
     curr_space.pos = end_pos
     self[start_pos] = nil
+  end
+
+  def right_color?(start_pos, color)
+    if color != self[start_pos].color
+      raise MoveError.new "not your piece!"
+    end
   end
 
   def valid_move?(start_pos, end_pos)
@@ -64,6 +74,7 @@ class Board
     unless valid_pawn_attack?(start_pos, end_pos)
       raise MoveError.new "Pawns only attack diagonally"
     end
+    true
   end
 
   def move!(start_pos, end_pos)
@@ -125,7 +136,7 @@ class Board
       begin
         valid_move?(start_pos, king_position)
         return true
-      rescue MoveError => e
+      rescue MoveError
         next
       end
     end
@@ -133,7 +144,31 @@ class Board
   end
 
   def checkmate?(color)
+    each_space do |space, start_pos|
+      next if space.nil? || space.color != color
+      possible_moves = space.possible_moves
 
+      possible_moves.each do |end_pos|
+        begin
+          valid_move?(start_pos, end_pos)
+          return false unless move_to_check?(start_pos, end_pos)
+        rescue MoveError
+          next
+        end
+      end
+    end
+    true
+  end
+
+  def move_to_check?(start_pos, end_pos)
+    end_piece = self[end_pos]
+
+    move!(start_pos, end_pos)
+    check_status = check?(self[end_pos].color)
+    move!(end_pos, start_pos)
+
+    self[end_pos] = end_piece
+    return check_status
   end
 
   def find_king_position(color)
