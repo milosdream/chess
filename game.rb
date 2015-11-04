@@ -14,6 +14,7 @@ class Game
   end
 
   def play
+    system("clear")
     puts "WELCOME TO CHESS!"
     sleep(1)
     play_turn until over?

@@ -8,7 +8,6 @@ class Board
   # Array of class constants
   SKILL_PIECES = [Rook, Knight, Bishop, King, Queen, Bishop, Knight, Rook]
 
-  sliding_p = SlidingPiece
   def initialize
       @grid = Array.new(8) {Array.new(8)}
       populate
@@ -34,7 +33,18 @@ class Board
 
   def move(start_pos, end_pos)
     curr_space = self[start_pos]
+    valid_move?(start_pos, end_pos)
+    #check?(color)
+
+    self[end_pos] = curr_space
+    curr_space.pos = end_pos
+    self[start_pos] = nil
+  end
+
+  def valid_move?(start_pos, end_pos)
+    curr_space = self[start_pos]
     future_space = self[end_pos]
+
     if curr_space.nil?
       raise MoveError.new "no piece here!"
     end
@@ -54,13 +64,6 @@ class Board
     unless valid_pawn_attack?(start_pos, end_pos)
       raise MoveError.new "Pawns only attack diagonally"
     end
-
-    # if curr_space.move_into_check?(end_pos)
-    #   raise MoveError.new "can't move here!"
-    # end
-    self[end_pos] = curr_space
-    curr_space.pos = end_pos
-    self[start_pos] = nil
   end
 
   def move!(start_pos, end_pos)
@@ -70,14 +73,12 @@ class Board
     self[start_pos] = nil
   end
 
-  def valid_moves
-
-  end
-
   def sliding_through?(start_pos, end_pos)
 
     curr_piece = self[start_pos]
-    return false unless curr_piece.is_a?(SlidingPiece)
+    unless curr_piece.is_a?(SlidingPiece) || curr_piece.is_a?(Pawn)
+      return false
+    end
 
     start_row, start_col  = start_pos
     end_row, end_col = end_pos
@@ -116,7 +117,39 @@ class Board
     !possibles.all? { |move| self[move].nil? }
   end
 
-  def move_into_check?
+  def check?(color)
+    king_position = find_king_position(color)
+
+
+    each_space do |space, start_pos|
+      begin
+        valid_move?(start_pos, king_position)
+        return true
+      rescue MoveError => e
+        next
+      end
+    end
+    false
+  end
+
+  def checkmate?(color)
+
+  end
+
+  def find_king_position(color)
+    each_space do |space, position|
+      if space.is_a?(King) && space.color == color
+        return position
+      end
+    end
+  end
+
+  def each_space(&blc)
+    @grid.each_with_index do |row, i|
+      row.each_with_index do |space, j|
+        blc.call(space, [i, j])
+      end
+    end
   end
 
   def valid_pawn_attack?(start_pos, end_pos)
@@ -135,7 +168,6 @@ class Board
     end
     true
   end
-
 
   def [](position)
     @grid[position.first][position.last]

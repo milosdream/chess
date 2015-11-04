@@ -10,9 +10,9 @@ class Piece
 
   def to_s
     if @color == :white
-      @type.to_s.red
-    elsif @color == :black
       @type.to_s.green
+    elsif @color == :black
+      @type.to_s.red
     end
   end
 
